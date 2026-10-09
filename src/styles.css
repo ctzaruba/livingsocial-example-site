@@ -399,6 +399,30 @@ h1 em {
   position: relative;
 }
 
+.card-photo {
+  position: relative;
+  margin: 0 -1.25rem 1rem;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+
+.card-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The photo fades into the night card below it. */
+.card-photo::after {
+  position: absolute;
+  inset: auto 0 0;
+  height: 40%;
+  background: linear-gradient(180deg, transparent, var(--surface));
+  content: "";
+}
+
 .card-art-icon {
   position: relative;
   filter: drop-shadow(0 0 8px rgba(255, 246, 224, 0.5));

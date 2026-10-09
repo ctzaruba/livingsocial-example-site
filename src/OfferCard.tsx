@@ -88,6 +88,18 @@ interface OfferCardProps {
   readonly city: string;
 }
 
+/** The offer's own photo when it has one that loads; else the site's drawing for its kind of evening. */
+function CardPicture({ offer }: { readonly offer: OfferSummary }) {
+  const photoUrl = webUrl(offer.primaryImageUrl);
+  const [failed, setFailed] = useState(false);
+  if (photoUrl === null || failed) return <CardArt category={offer.category} />;
+  return (
+    <div className="card-photo">
+      <img src={photoUrl} alt="" loading="lazy" decoding="async" onError={() => setFailed(true)} />
+    </div>
+  );
+}
+
 export function OfferCard({ offer, city }: OfferCardProps) {
   const detail = useOfferDetail(offer.permalink);
   const buyUrl = webUrl(offer.buyUrl);
@@ -95,7 +107,7 @@ export function OfferCard({ offer, city }: OfferCardProps) {
 
   return (
     <li className="card">
-      <CardArt category={offer.category} />
+      <CardPicture offer={offer} />
       <p className="card-category">{[offer.category, offer.city].filter(Boolean).join(" · ")}</p>
       <h3 className="card-title">{offer.title}</h3>
       {offer.summary !== null && <p className="card-summary">{offer.summary}</p>}

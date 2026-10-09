@@ -27,6 +27,8 @@ export interface OfferSummary {
   readonly category: string | null;
   readonly city: string | null;
   readonly price: Price | null;
+  /** The offer's main picture at grid size, on Groupon's image host; null when Groupon sent none. */
+  readonly primaryImageUrl: string | null;
   /** The offer's page, for a person. */
   readonly offerUrl: string;
   /** Puts the cheapest option in the person's cart; null when it cannot be bought now. */
@@ -119,6 +121,7 @@ function parseOffer(value: unknown): OfferSummary | null {
     category: asString(value.category),
     city: asString(value.city),
     price: parsePrice(value.price),
+    primaryImageUrl: asString(value.primaryImageUrl),
     buyUrl: asString(value.buyUrl),
   };
 }

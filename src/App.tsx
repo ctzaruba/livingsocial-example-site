@@ -179,7 +179,7 @@ export function App() {
           purchase doesn&rsquo;t reserve a date or time.
         </p>
         <p>
-          The drawings are the site&rsquo;s own: the API sends no pictures of offers.{" "}
+          Photos come with the offers; an offer without one gets the site&rsquo;s own drawing.{" "}
           <a href={SOURCE_URL} target="_blank" rel="noopener noreferrer">
             Read the source
           </a>
