@@ -10,7 +10,7 @@ export const API_BASE = "https://api-core.livingsocial.com";
 /** Names this app on the journey that the optional session records. */
 export const AGENT_NAME = "date-night-austin";
 
-/** Register a session once and send it as a bearer token, so the journey is tracked. Reads work without it. */
+/** Open a shopping session once and send its token as a bearer, so the journey is tracked. Reads work without it. */
 export const TRACK_JOURNEY = true;
 
 export const CITIES = ["Austin", "Chicago", "San Diego"] as const;

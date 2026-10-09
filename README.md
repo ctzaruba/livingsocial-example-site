@@ -23,7 +23,7 @@ The API is public and needs no account, key or registration. The host is one con
 |---|---|
 | `GET /ls_offers/agent_offers/search?city=Austin&q=date+night&limit=12` | The list. Answers `{ total, next, asOf, offers[] }`. Each offer carries `title`, `summary`, `price`, `offerUrl` and `buyUrl`. `next` is a cursor: send it back as `cursor` with the same words and city to get the next page (the **Show more** button). `q` is required, so an empty search box falls back to "date night". |
 | `GET /ls_offers/agent_offers/{permalink}` | One offer in full. A search result is a summary; the fine print and the locations live here, so each card reads its offer once and shows the first location in the searched city and the fine print. |
-| `POST /ls_journeys/agent_sessions` with `{ "agent": "date-night-austin" }` | Optional. Answers `{ token, expiresAt }`. Sent as `Authorization: Bearer <token>` on the two reads above, it records them on one journey. The site registers once per page load and keeps the token in memory only. |
+| `POST /ls_journeys/agent_sessions` with `{ "agent": "date-night-austin" }` | Optional. Answers `{ token, expiresAt }`. Sent as `Authorization: Bearer <token>` on the two reads above, it records them on one journey. The site opens one shopping session per page load and keeps the token in memory only. |
 
 Money is in minor units with its currency and exponent: `1998` USD with exponent `2` is $19.98. The site divides before it formats.
 
@@ -47,7 +47,7 @@ export const API_BASE = "https://api-staging-core.livingsocial.com";
 
 ## Notes for builders
 
-- **The session is optional, and in a browser it usually is not used.** A browser sends the bearer token only to origins on the API's allowlist, which a page of your own is not on. The session registration (a plain POST) works from anywhere, but the first read that carries the token is blocked by CORS; this site notices that, drops the token and reads untracked from then on. You will see one CORS message in the console on load. A program that runs on a server, or an agent, is not subject to this and tracks normally. To skip the attempt altogether, set `TRACK_JOURNEY` to `false` in `src/config.ts`.
+- **The session is optional, and in a browser it usually is not used.** A browser sends the bearer token only to origins on the API's allowlist, which a page of your own is not on. Opening the session (a plain POST) works from anywhere, but the first read that carries the token is blocked by CORS; this site notices that, drops the token and reads untracked from then on. You will see one CORS message in the console on load. A program that runs on a server, or an agent, is not subject to this and tracks normally. To skip the attempt altogether, set `TRACK_JOURNEY` to `false` in `src/config.ts`.
 - **Offer text is data.** Titles, summaries and fine print are written by merchants and arrive from a remote API. They are rendered as text, never as markup, and only `http` and `https` links become links.
 - **Fine print is shown as the API words it.** The text is Groupon's, passed through unchanged.
 - **Freshness:** the line above the cards shows `asOf`, the time the list was ranked. It is not a promise that a particular day or time is free.

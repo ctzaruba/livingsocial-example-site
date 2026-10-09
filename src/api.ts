@@ -191,7 +191,7 @@ async function fetchJson(url: string, token: string | null, signal?: AbortSignal
 }
 
 /** One call, once per page load: the token is kept in memory and never stored. */
-async function registerSession(baseUrl: string, agent: string): Promise<string | null> {
+async function openSession(baseUrl: string, agent: string): Promise<string | null> {
   try {
     const response = await fetch(`${baseUrl}/ls_journeys/agent_sessions`, {
       method: "POST",
@@ -213,14 +213,14 @@ interface ClientOptions {
 }
 
 export function createClient({ baseUrl, agent, trackJourney }: ClientOptions): LivingSocialClient {
-  // The session is optional: a failed registration, or a bearer read the browser blocks, leaves
+  // The session is optional: a session that fails to open, or a bearer read the browser blocks, leaves
   // `null` here and every read goes on untracked.
   let session: Promise<string | null> | null = null;
   const details = new Map<string, Promise<OfferDetail>>();
 
   function currentToken(): Promise<string | null> {
     if (!trackJourney) return Promise.resolve(null);
-    session ??= registerSession(baseUrl, agent);
+    session ??= openSession(baseUrl, agent);
     return session;
   }
 
