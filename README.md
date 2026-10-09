@@ -1,5 +1,7 @@
 # Date night in Austin
 
+Live: https://livingsocial-example-site.vercel.app
+
 An example site on the LivingSocial agent API. Licensed under the MIT License, copyright Groupon, Inc. 2026 (see `LICENSE`).
 
 It is one page that lists live LivingSocial offers for a date night in Austin, Chicago or San Diego. Each card shows the title, the price, the place, the fine print, a **Buy on Groupon** link and an **Offer page** link. A city switch and a word search box change what is listed. It is plain Vite, React and TypeScript, with no UI kit, no backend and no API key: the browser calls the public API directly.
