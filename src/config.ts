@@ -7,6 +7,9 @@ export const API_BASE = "https://api-core.livingsocial.com";
 // To try the same site against staging, switch to the line below (it mirrors production):
 // export const API_BASE = "https://api-staging-core.livingsocial.com";
 
+/** Where the code of this site lives. */
+export const SOURCE_URL = "https://github.com/ctzaruba/livingsocial-example-site";
+
 /** Names this app on the journey that the optional session records. */
 export const AGENT_NAME = "date-night-austin";
 

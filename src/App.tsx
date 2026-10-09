@@ -7,8 +7,10 @@
 
 import { type FormEvent, useEffect, useState } from "react";
 import { ApiError, livingSocial, type OfferSummary } from "./api";
-import { CITIES, type City, DEFAULT_QUERY, PAGE_SIZE } from "./config";
+import { CITIES, type City, DEFAULT_QUERY, PAGE_SIZE, SOURCE_URL } from "./config";
+import { Logo } from "./Logo";
 import { OfferCard } from "./OfferCard";
+import { Skyline } from "./Skyline";
 
 type MoreState = "idle" | "loading" | "failed";
 
@@ -111,11 +113,27 @@ export function App() {
   return (
     <div className="page">
       <header className="masthead">
-        <p className="eyebrow">An example on the LivingSocial agent API</p>
-        <h1>Date night in {city}</h1>
-        <p className="lede">
-          Live LivingSocial offers for {city}, matching “{query}”. Pick a city, change the words, and buy on Groupon.
-        </p>
+        <div className="topbar">
+          <Logo />
+          <a className="topbar-link" href={SOURCE_URL} target="_blank" rel="noopener noreferrer">
+            Source on GitHub
+          </a>
+        </div>
+
+        <div className="hero">
+          <div className="hero-text">
+            <p className="eyebrow">An example on the LivingSocial agent API</p>
+            <h1>
+              Date night <em>in {city}</em>
+            </h1>
+            <p className="lede">
+              Live LivingSocial offers for {city}, matching “{query}”. Pick a city, change the words, and buy on Groupon.
+            </p>
+          </div>
+          <div className="hero-art">
+            <Skyline />
+          </div>
+        </div>
 
         <form className="controls" onSubmit={handleSubmit}>
           <fieldset className="cities">
@@ -159,6 +177,13 @@ export function App() {
         <p>
           Offers and prices come live from LivingSocial; you complete the purchase on Groupon&rsquo;s checkout, and a
           purchase doesn&rsquo;t reserve a date or time.
+        </p>
+        <p>
+          The drawings are the site&rsquo;s own: the API sends no pictures of offers.{" "}
+          <a href={SOURCE_URL} target="_blank" rel="noopener noreferrer">
+            Read the source
+          </a>
+          .
         </p>
       </footer>
     </div>

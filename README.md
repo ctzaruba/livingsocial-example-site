@@ -6,7 +6,7 @@ An example site on the LivingSocial agent API. Licensed under the MIT License, c
 
 It is one page that lists live LivingSocial offers for a date night in Austin, Chicago or San Diego. Each card shows the title, the price, the place, the fine print, a **Buy on Groupon** link and an **Offer page** link. A city switch and a word search box change what is listed. It is plain Vite, React and TypeScript, with no UI kit, no backend and no API key: the browser calls the public API directly.
 
-It is meant to be read and copied. Every offer, price, place and link on screen comes from the API; nothing is made up in the page.
+It is meant to be read and copied. Every offer, price, place and link on screen comes from the API; nothing is made up in the page. The look is the site's own: Austin after dark, a moon-and-heart mark, and drawings (the skyline with the Congress Avenue Bridge and its bats, one small picture per kind of evening on each card). The API sends no pictures of offers, so no card shows a photo that pretends to be the offer.
 
 ## Run it
 
@@ -63,7 +63,8 @@ export const API_BASE = "https://api-staging-core.livingsocial.com";
 | `src/api.ts` | The three calls, response checks, the optional session, error and retry handling |
 | `src/App.tsx` | The page: city switch, search form, results, loading, empty and error states |
 | `src/OfferCard.tsx` | One card: price, place, fine print, the two links |
-| `src/styles.css` | All the styling |
+| `src/Logo.tsx`, `src/Skyline.tsx`, `src/CardArt.tsx` | The mark, the masthead's picture of Austin at night, and each card's band, all drawn as SVG |
+| `src/styles.css` | All the styling: the night palette, the neon pink and the amber |
 
 ## Licence
 

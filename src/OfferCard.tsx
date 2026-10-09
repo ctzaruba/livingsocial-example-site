@@ -8,6 +8,7 @@
 import { useEffect, useState } from "react";
 import type { OfferDetail, OfferLocation, OfferSummary, Price } from "./api";
 import { livingSocial } from "./api";
+import { CardArt } from "./CardArt";
 
 type DetailState =
   | { readonly status: "loading" }
@@ -94,6 +95,7 @@ export function OfferCard({ offer, city }: OfferCardProps) {
 
   return (
     <li className="card">
+      <CardArt category={offer.category} />
       <p className="card-category">{[offer.category, offer.city].filter(Boolean).join(" · ")}</p>
       <h3 className="card-title">{offer.title}</h3>
       {offer.summary !== null && <p className="card-summary">{offer.summary}</p>}
