@@ -23,9 +23,9 @@ The API is public and needs no account, key or registration. The host is one con
 
 | Endpoint | What the site does with it |
 |---|---|
-| `GET /ls_offers/agent_offers/search?city=Austin&q=date+night&limit=12` | The list. Answers `{ total, next, asOf, offers[] }`. Each offer carries `title`, `summary`, `price`, `primaryImageUrl` (its main photo, or null), `offerUrl` and `buyUrl`. `next` is a cursor: send it back as `cursor` with the same words and city to get the next page (the **Show more** button). `q` is required, so an empty search box falls back to "date night". |
-| `GET /ls_offers/agent_offers/{permalink}` | One offer in full. A search result is a summary; the fine print and the locations live here, so each card reads its offer once and shows the first location in the searched city and the fine print. |
-| `POST /ls_journeys/agent_sessions` with `{ "agent": "date-night-austin" }` | Optional. Answers `{ token, expiresAt }`. Sent as `Authorization: Bearer <token>` on the two reads above, it records them on one journey. The site opens one shopping session per page load and keeps the token in memory only. |
+| `GET /ls_agent_api/offers/search?city=Austin&q=date+night&limit=12` | The list. Answers `{ total, next, asOf, offers[] }`. Each offer carries `title`, `summary`, `price`, `primaryImageUrl` (its main photo, or null), `offerUrl` and `buyUrl`. `next` is a cursor: send it back as `cursor` with the same words and city to get the next page (the **Show more** button). `q` is required, so an empty search box falls back to "date night". |
+| `GET /ls_agent_api/offers/{permalink}` | One offer in full. A search result is a summary; the fine print and the locations live here, so each card reads its offer once and shows the first location in the searched city and the fine print. |
+| `POST /ls_agent_api/sessions` with `{ "agent": "date-night-austin" }` | Optional. Answers `{ token, expiresAt, cartUrl }`. Sent as `Authorization: Bearer <token>` on the two reads above, it records them on one journey. The site opens one shopping session per page load and keeps the token in memory only. |
 
 Money is in minor units with its currency and exponent: `1998` USD with exponent `2` is $19.98. The site divides before it formats.
 

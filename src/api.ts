@@ -1,9 +1,9 @@
 /**
  * A small client for the three LivingSocial agent endpoints this site uses.
  *
- *   GET  /ls_offers/agent_offers/search       the ranked list, one page at a time
- *   GET  /ls_offers/agent_offers/{permalink}  one offer in full (fine print, locations)
- *   POST /ls_journeys/agent_sessions          optional: a token that tracks this app's journey
+ *   GET  /ls_agent_api/offers/search       the ranked list, one page at a time
+ *   GET  /ls_agent_api/offers/{permalink}  one offer in full (fine print, locations)
+ *   POST /ls_agent_api/sessions            optional: a token that tracks this app's journey
  *
  * Everything that comes back is untrusted data: it is checked at the edge here, and the UI only
  * ever renders it as text.
@@ -196,7 +196,7 @@ async function fetchJson(url: string, token: string | null, signal?: AbortSignal
 /** One call, once per page load: the token is kept in memory and never stored. */
 async function openSession(baseUrl: string, agent: string): Promise<string | null> {
   try {
-    const response = await fetch(`${baseUrl}/ls_journeys/agent_sessions`, {
+    const response = await fetch(`${baseUrl}/ls_agent_api/sessions`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify({ agent }),
@@ -247,13 +247,13 @@ export function createClient({ baseUrl, agent, trackJourney }: ClientOptions): L
     async search({ city, q, limit, cursor }, signal) {
       const query = new URLSearchParams({ city, q, limit: String(limit) });
       if (cursor !== undefined) query.set("cursor", cursor);
-      return parseSearchResult(await get(`/ls_offers/agent_offers/search?${query.toString()}`, signal));
+      return parseSearchResult(await get(`/ls_agent_api/offers/search?${query.toString()}`, signal));
     },
 
     offerDetail(permalink) {
       const cached = details.get(permalink);
       if (cached !== undefined) return cached;
-      const request = get(`/ls_offers/agent_offers/${encodeURIComponent(permalink)}`).then(parseOfferDetail);
+      const request = get(`/ls_agent_api/offers/${encodeURIComponent(permalink)}`).then(parseOfferDetail);
       details.set(permalink, request);
       // A failed read must not stay cached, or "try again" would replay the failure.
       request.catch(() => details.delete(permalink));

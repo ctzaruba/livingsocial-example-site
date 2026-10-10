@@ -2,7 +2,7 @@
  * One offer as a card: title, price, place, fine print, and the two links the API hands back.
  *
  * The search answer is a summary. The place and the fine print live on the full offer, so each
- * card reads it once (`GET /ls_offers/agent_offers/{permalink}`) and shows what it finds.
+ * card reads it once (`GET /ls_agent_api/offers/{permalink}`) and shows what it finds.
  */
 
 import { useEffect, useState } from "react";
