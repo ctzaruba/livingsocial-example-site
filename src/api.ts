@@ -51,7 +51,18 @@ export interface OfferLocation {
   readonly city: string | null;
 }
 
+export interface BookingOption {
+  readonly id: string;
+  readonly title: string;
+  readonly bookingUrl: string;
+}
+
 export interface OfferDetail {
+  readonly buyUrl: string | null;
+  readonly bookingUrl: string | null;
+  /** False is unavailable; null means the API did not state availability. */
+  readonly buyable: boolean | null;
+  readonly bookingOptions: readonly BookingOption[];
   readonly finePrint: readonly string[];
   readonly locations: readonly OfferLocation[];
 }
@@ -121,7 +132,7 @@ function parseOffer(value: unknown): OfferSummary | null {
     category: asString(value.category),
     city: asString(value.city),
     price: parsePrice(value.price),
-    primaryImageUrl: asString(value.primaryImageUrl),
+    primaryImageUrl: asString(value.imageUrl) ?? asString(value.primaryImageUrl),
     buyUrl: asString(value.buyUrl),
   };
 }
@@ -154,7 +165,27 @@ function parseOfferDetail(json: unknown): OfferDetail {
   const locations = Array.isArray(offer.locations)
     ? offer.locations.map(parseLocation).filter((location): location is OfferLocation => location !== null)
     : [];
-  return { finePrint, locations };
+  const buy = isRecord(offer.buy) ? offer.buy : null;
+  const buyable = typeof offer.buyable === "boolean"
+    ? offer.buyable
+    : typeof buy?.available === "boolean" ? buy.available : null;
+  const bookingOptions = Array.isArray(offer.options)
+    ? offer.options.flatMap((option): BookingOption[] => {
+        if (!isRecord(option)) return [];
+        const id = asString(option.id);
+        const title = asString(option.title);
+        const bookingUrl = asString(option.bookingUrl);
+        return id !== null && title !== null && bookingUrl !== null ? [{ id, title, bookingUrl }] : [];
+      })
+    : [];
+  return {
+    finePrint,
+    locations,
+    buyUrl: buyable === false ? null : asString(offer.buyUrl),
+    bookingUrl: asString(offer.bookingUrl),
+    buyable,
+    bookingOptions,
+  };
 }
 
 /**

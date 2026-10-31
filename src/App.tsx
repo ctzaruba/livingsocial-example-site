@@ -175,8 +175,8 @@ export function App() {
 
       <footer className="footer">
         <p>
-          Offers and prices come live from LivingSocial; you complete the purchase on Groupon&rsquo;s checkout, and a
-          purchase doesn&rsquo;t reserve a date or time.
+          Offers and prices come live from LivingSocial. Complete your purchase on Groupon. Where booking is
+          available, choose your date and time there; buying a voucher alone doesn&rsquo;t reserve a time.
         </p>
         <p>
           Photos come with the offers; an offer without one gets the site&rsquo;s own drawing.{" "}

@@ -550,6 +550,32 @@ h1 em {
   margin-top: 0.25rem;
 }
 
+.card .card-booking-note {
+  margin-bottom: 0.75rem;
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+
+.card-booking-options {
+  margin-bottom: 1rem;
+}
+
+.card-booking-options summary {
+  min-height: 44px;
+  padding: 0.5rem 0;
+  color: var(--neon);
+  cursor: pointer;
+}
+
+.card-booking-options ul {
+  padding-left: 1.125rem;
+}
+
+.card-booking-options a {
+  display: inline-block;
+  padding: 0.5rem 0;
+}
+
 .card-actions {
   display: flex;
   flex-wrap: wrap;

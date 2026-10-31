@@ -6,7 +6,7 @@ An example site on the LivingSocial agent API. Licensed under the MIT License, c
 
 It is one page that lists live LivingSocial offers for a date night in Austin, Chicago or San Diego. Each card shows the title, the price, the place, the fine print, a **Buy on Groupon** link and an **Offer page** link. A city switch and a word search box change what is listed. It is plain Vite, React and TypeScript, with no UI kit, no backend and no API key: the browser calls the public API directly.
 
-It is meant to be read and copied. Every offer, price, place and link on screen comes from the API; nothing is made up in the page. The look is the site's own: Austin after dark, a moon-and-heart mark, and drawings (the skyline with the Congress Avenue Bridge and its bats, one small picture per kind of evening on each card). Each card shows the offer's own photo (`primaryImageUrl` in the search answer); an offer without one gets the drawing for its kind of evening, never a stock photo that pretends to be the offer.
+It is meant to be read and copied. Every offer, price, place and link on screen comes from the API; nothing is made up in the page. The look is the site's own: Austin after dark, a moon-and-heart mark, and drawings (the skyline with the Congress Avenue Bridge and its bats, one small picture per kind of evening on each card). Each card shows the offer's own photo (`imageUrl` in the search answer); an offer without one gets the drawing for its kind of evening, never a stock photo that pretends to be the offer.
 
 ## Run it
 
@@ -23,13 +23,13 @@ The API is public and needs no account, key or registration. The host is one con
 
 | Endpoint | What the site does with it |
 |---|---|
-| `GET /ls_agent_api/offers/search?city=Austin&q=date+night&limit=12` | The list. Answers `{ total, next, asOf, offers[] }`. Each offer carries `title`, `summary`, `price`, `primaryImageUrl` (its main photo, or null), `offerUrl` and `buyUrl`. `next` is a cursor: send it back as `cursor` with the same words and city to get the next page (the **Show more** button). `q` is required, so an empty search box falls back to "date night". |
-| `GET /ls_agent_api/offers/{permalink}` | One offer in full. A search result is a summary; the fine print and the locations live here, so each card reads its offer once and shows the first location in the searched city and the fine print. |
+| `GET /ls_agent_api/offers/search?city=Austin&q=date+night&limit=12` | The list. Answers `{ total, next, asOf, offers[] }`. Each offer carries `title`, `summary`, `price`, `imageUrl` (its main photo, or null), `offerUrl` and `buyable`. `next` is a cursor: send it back as `cursor` with the same words and city to get the next page (the **Show more** button). `q` is required, so an empty search box falls back to "date night". |
+| `GET /ls_agent_api/offers/{permalink}` | One offer in full. A search result is a summary; the fine print and the locations live here, so each card reads its offer once and shows the first location in the searched city and the fine print. This answer also supplies `buyUrl`, `bookingUrl` and booking links per option. |
 | `POST /ls_agent_api/sessions` with `{ "agent": "date-night-austin" }` | Optional. Answers `{ token, expiresAt, cartUrl }`. Sent as `Authorization: Bearer <token>` on the two reads above, it records them on one journey. The site opens one shopping session per page load and keeps the token in memory only. |
 
 Money is in minor units with its currency and exponent: `1998` USD with exponent `2` is $19.98. The site divides before it formats.
 
-The two links are used exactly as returned. `buyUrl` puts the cheapest option in the person's LivingSocial cart; the person pays on Groupon's checkout. A purchase does not reserve a date or time, and the page footer says so.
+Purchase and booking links are read from the offer detail and used exactly as returned. `buyUrl` puts the cheapest option in the person's LivingSocial cart; the person pays on Groupon's checkout. A voucher purchase does not reserve a date or time. When the API supplies a booking link, the card offers **Choose dates & book**, which opens Groupon to select dates and pay. If only option-specific booking links are supplied, the card lists those options. This site does not create holds or claim that a reservation has already been made.
 
 ### What the page does when things go wrong
 
@@ -62,7 +62,7 @@ export const API_BASE = "https://api-staging-core.livingsocial.com";
 | `src/config.ts` | The host, the agent name, the cities, the default words, the page size |
 | `src/api.ts` | The three calls, response checks, the optional session, error and retry handling |
 | `src/App.tsx` | The page: city switch, search form, results, loading, empty and error states |
-| `src/OfferCard.tsx` | One card: the photo (or the drawing), price, place, fine print, the two links |
+| `src/OfferCard.tsx` | One card: the photo (or the drawing), price, place, fine print, purchase and booking links |
 | `src/Logo.tsx`, `src/Skyline.tsx`, `src/CardArt.tsx` | The mark, the masthead's picture of Austin at night, and each card's band, all drawn as SVG |
 | `src/styles.css` | All the styling: the night palette, the neon pink and the amber |
 

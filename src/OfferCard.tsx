@@ -102,12 +102,16 @@ function CardPicture({ offer }: { readonly offer: OfferSummary }) {
 
 export function OfferCard({ offer, city }: OfferCardProps) {
   const detail = useOfferDetail(offer.permalink);
-  const buyUrl = webUrl(offer.buyUrl);
+  const buyUrl = webUrl(detail.status === "ready" ? detail.detail.buyUrl : offer.buyUrl);
+  const bookingUrl = webUrl(detail.status === "ready" ? detail.detail.bookingUrl : null);
+  const bookingOptions = detail.status === "ready"
+    ? detail.detail.bookingOptions.filter((option) => webUrl(option.bookingUrl) !== null)
+    : [];
   const offerUrl = webUrl(offer.offerUrl);
 
   return (
     <li className="card">
-      <CardPicture offer={offer} />
+      <CardPicture key={offer.primaryImageUrl} offer={offer} />
       <p className="card-category">{[offer.category, offer.city].filter(Boolean).join(" · ")}</p>
       <h3 className="card-title">{offer.title}</h3>
       {offer.summary !== null && <p className="card-summary">{offer.summary}</p>}
@@ -122,16 +126,38 @@ export function OfferCard({ offer, city }: OfferCardProps) {
       <PlaceLine state={detail} city={city} />
       <FinePrint state={detail} />
 
+      {bookingUrl !== null || bookingOptions.length > 0 ? (
+        <p className="card-booking-note">Choose your date and time on Groupon before paying.</p>
+      ) : null}
+      {bookingUrl === null && bookingOptions.length > 0 && (
+        <details className="card-booking-options">
+          <summary>Choose a booking option</summary>
+          <ul>
+            {bookingOptions.map((option) => (
+              <li key={option.id}>
+                <a href={option.bookingUrl} target="_blank" rel="noopener noreferrer">{option.title}</a>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
       <div className="card-actions">
+        {bookingUrl !== null && (
+          <a className="button button-primary" href={bookingUrl} target="_blank" rel="noopener noreferrer">
+            Choose dates & book
+          </a>
+        )}
         {buyUrl !== null ? (
           <a className="button button-primary" href={buyUrl} target="_blank" rel="noopener noreferrer">
             Buy on Groupon
           </a>
-        ) : (
-          <span className="button button-disabled" aria-disabled="true">
-            Not for sale right now
+        ) : bookingUrl === null && bookingOptions.length === 0 ? (
+          <span className="card-muted" role="status">
+            {detail.status === "loading" ? "Checking purchase options…"
+              : detail.status === "ready" && detail.detail.buyable === false ? "Not for sale right now"
+              : "Check the offer page for purchase options."}
           </span>
-        )}
+        ) : null}
         {offerUrl !== null && (
           <a className="button button-secondary" href={offerUrl} target="_blank" rel="noopener noreferrer">
             Offer page
