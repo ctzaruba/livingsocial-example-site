@@ -2,11 +2,11 @@
  * "Date night in Austin": one page that searches live LivingSocial offers by city and words.
  *
  * The search runs when the city changes or the form is submitted, never on each keystroke: the
- * API allows 60 searches a minute from one address.
+ * Partner API limits how often one storefront may search.
  */
 
 import { type FormEvent, useEffect, useState } from "react";
-import { ApiError, livingSocial, type OfferSummary } from "./api";
+import { ApiError, type ProductCard, search } from "./api";
 import { CITIES, type City, DEFAULT_QUERY, PAGE_SIZE, SOURCE_URL } from "./config";
 import { Logo } from "./Logo";
 import { OfferCard } from "./OfferCard";
@@ -21,7 +21,7 @@ type ResultsView =
       readonly status: "ready";
       /** Which search these offers belong to, so a late "show more" cannot land on a newer one. */
       readonly searchKey: string;
-      readonly offers: readonly OfferSummary[];
+      readonly offers: readonly ProductCard[];
       readonly total: number;
       readonly next: string | null;
       readonly asOf: string;
@@ -32,7 +32,7 @@ function describeError(error: unknown): ResultsView {
   if (error instanceof ApiError && error.retryAfterSeconds !== null) {
     return {
       status: "error",
-      message: "LivingSocial asks for a short pause: this connection has searched a lot in the last minute.",
+      message: "LivingSocial asks for a short pause: this site has searched a lot in the last minute.",
       retryAfterSeconds: error.retryAfterSeconds,
     };
   }
@@ -63,12 +63,12 @@ export function App() {
   useEffect(() => {
     const controller = new AbortController();
     setView({ status: "loading" });
-    livingSocial.search({ city, q: query, limit: PAGE_SIZE }, controller.signal).then(
+    search({ city, q: query, limit: PAGE_SIZE }, controller.signal).then(
       (result) =>
         setView({
           status: "ready",
           searchKey,
-          offers: result.offers,
+          offers: result.products,
           total: result.total,
           next: result.next,
           asOf: result.asOf,
@@ -96,11 +96,11 @@ export function App() {
     const cursor = view.next;
     const startedFor = view.searchKey;
     setView({ ...view, more: "loading" });
-    livingSocial.search({ city, q: query, limit: PAGE_SIZE, cursor }).then(
+    search({ city, q: query, limit: PAGE_SIZE, cursor }).then(
       (page) =>
         setView((current) =>
           current.status === "ready" && current.searchKey === startedFor
-            ? { ...current, offers: [...current.offers, ...page.offers], next: page.next, total: page.total, more: "idle" }
+            ? { ...current, offers: [...current.offers, ...page.products], next: page.next, total: page.total, more: "idle" }
             : current
         ),
       () =>
@@ -122,7 +122,7 @@ export function App() {
 
         <div className="hero">
           <div className="hero-text">
-            <p className="eyebrow">An example on the LivingSocial agent API</p>
+            <p className="eyebrow">An example on the LivingSocial Partner API</p>
             <h1>
               Date night <em>in {city}</em>
             </h1>
@@ -175,7 +175,7 @@ export function App() {
 
       <footer className="footer">
         <p>
-          Offers and prices come live from LivingSocial. Complete your purchase on Groupon. Where booking is
+          Offers and prices come live from LivingSocial. You pay on Groupon&rsquo;s checkout. Where booking is
           available, choose your date and time there; buying a voucher alone doesn&rsquo;t reserve a time.
         </p>
         <p>
@@ -223,7 +223,7 @@ function Results({ view, city, onRetry, onShowMore }: ResultsProps) {
           </p>
           <ul className="grid">
             {view.offers.map((offer) => (
-              <OfferCard key={offer.id} offer={offer} city={city} />
+              <OfferCard key={offer.id} product={offer} city={city} />
             ))}
           </ul>
           {view.next !== null && (

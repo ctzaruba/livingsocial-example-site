@@ -1,7 +1,7 @@
 {
   "name": "livingsocial-example-site",
   "version": "1.0.0",
-  "description": "Date night in Austin: an example site on the LivingSocial agent API",
+  "description": "Date night in Austin: an example site on the LivingSocial Partner API",
   "private": true,
   "type": "module",
   "license": "MIT",
@@ -9,7 +9,8 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@fontsource/dm-serif-display": "^5.3.0",
@@ -17,10 +18,12 @@
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
+    "@types/node": "^22.20.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
     "typescript": "^5.9.0",
-    "vite": "^8.3.4"
+    "vite": "^8.3.4",
+    "vitest": "^5.1.1"
   }
 }

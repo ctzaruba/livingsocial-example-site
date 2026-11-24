@@ -1,40 +1,15 @@
 /**
- * One offer as a card: title, price, place, fine print, and the two links the API hands back.
+ * One product as a card: photo, title, price, place, fine print, and the way to buy it.
  *
- * The search answer is a summary. The place and the fine print live on the full offer, so each
- * card reads it once (`GET /ls_agent_api/offers/{permalink}`) and shows what it finds.
+ * The search answer already carries each product in full, so the card reads nothing more. Buying
+ * is a form that posts to the site's own function (`/api/buy`) in a new tab: the function makes a
+ * cart under the storefront's key and sends the tab on to the cart's `buyLink`, Groupon's
+ * checkout with the storefront's logo.
  */
 
-import { useEffect, useState } from "react";
-import type { OfferDetail, OfferLocation, OfferSummary, Price } from "./api";
-import { livingSocial } from "./api";
+import { useState } from "react";
+import { BUY_ACTION, type Place, type Price, type ProductCard } from "./api";
 import { CardArt } from "./CardArt";
-
-type DetailState =
-  | { readonly status: "loading" }
-  | { readonly status: "ready"; readonly detail: OfferDetail }
-  | { readonly status: "failed" };
-
-function useOfferDetail(permalink: string): DetailState {
-  const [state, setState] = useState<DetailState>({ status: "loading" });
-
-  useEffect(() => {
-    let cancelled = false;
-    livingSocial.offerDetail(permalink).then(
-      (detail) => {
-        if (!cancelled) setState({ status: "ready", detail });
-      },
-      () => {
-        if (!cancelled) setState({ status: "failed" });
-      }
-    );
-    return () => {
-      cancelled = true;
-    };
-  }, [permalink]);
-
-  return state;
-}
 
 /** Money comes in minor units: 1998 with exponent 2 is 19.98. */
 function formatMinor(minor: number, price: Price): string {
@@ -57,13 +32,13 @@ function tidy(text: string | null): string | null {
   return trimmed === undefined || trimmed === "" ? null : trimmed;
 }
 
-interface Place {
+interface PlaceLabel {
   readonly label: string;
   readonly moreInCity: number;
 }
 
-/** The first location in the city that was searched, and how many more the offer has there. */
-function placeOf(locations: readonly OfferLocation[], city: string): Place | null {
+/** The first location in the city that was searched, and how many more the product has there. */
+function placeOf(locations: readonly Place[], city: string): PlaceLabel | null {
   const inCity = locations.filter((location) => location.city?.toLowerCase() === city.toLowerCase());
   const first = inCity[0];
   if (first === undefined) return null;
@@ -83,16 +58,16 @@ function webUrl(value: string | null): string | null {
 }
 
 interface OfferCardProps {
-  readonly offer: OfferSummary;
-  /** The city that was searched; the card shows the offer's location in it. */
+  readonly product: ProductCard;
+  /** The city that was searched; the card shows the product's location in it. */
   readonly city: string;
 }
 
-/** The offer's own photo when it has one that loads; else the site's drawing for its kind of evening. */
-function CardPicture({ offer }: { readonly offer: OfferSummary }) {
-  const photoUrl = webUrl(offer.primaryImageUrl);
+/** The product's own photo when it has one that loads; else the site's drawing for its kind of evening. */
+function CardPicture({ product }: { readonly product: ProductCard }) {
+  const photoUrl = webUrl(product.imageUrl);
   const [failed, setFailed] = useState(false);
-  if (photoUrl === null || failed) return <CardArt category={offer.category} />;
+  if (photoUrl === null || failed) return <CardArt category={product.category} />;
   return (
     <div className="card-photo">
       <img src={photoUrl} alt="" loading="lazy" decoding="async" onError={() => setFailed(true)} />
@@ -100,34 +75,39 @@ function CardPicture({ offer }: { readonly offer: OfferSummary }) {
   );
 }
 
-export function OfferCard({ offer, city }: OfferCardProps) {
-  const detail = useOfferDetail(offer.permalink);
-  const buyUrl = webUrl(detail.status === "ready" ? detail.detail.buyUrl : offer.buyUrl);
-  const bookingUrl = webUrl(detail.status === "ready" ? detail.detail.bookingUrl : null);
-  const bookingOptions = detail.status === "ready"
-    ? detail.detail.bookingOptions.filter((option) => webUrl(option.bookingUrl) !== null)
-    : [];
-  const offerUrl = webUrl(offer.offerUrl);
+export function OfferCard({ product, city }: OfferCardProps) {
+  const bookingUrl = webUrl(product.bookingUrl);
+  const bookingOptions = product.bookingOptions.filter((option) => webUrl(option.bookingUrl) !== null);
+  const place = placeOf(product.locations, city);
 
   return (
     <li className="card">
-      <CardPicture key={offer.primaryImageUrl} offer={offer} />
-      <p className="card-category">{[offer.category, offer.city].filter(Boolean).join(" · ")}</p>
-      <h3 className="card-title">{offer.title}</h3>
-      {offer.summary !== null && <p className="card-summary">{offer.summary}</p>}
+      <CardPicture key={product.imageUrl} product={product} />
+      <p className="card-category">{[product.category, city].filter(Boolean).join(" · ")}</p>
+      <h3 className="card-title">{product.title}</h3>
+      {product.summary !== null && <p className="card-summary">{product.summary}</p>}
 
-      {offer.price !== null && (
+      {product.price !== null && (
         <p className="card-price">
-          <span className="card-price-amount">{priceLabel(offer.price)}</span>
-          {offer.price.fromMinor !== offer.price.toMinor && <span className="card-price-note"> depending on the option</span>}
+          <span className="card-price-amount">{priceLabel(product.price)}</span>
+          {product.price.fromMinor !== product.price.toMinor && <span className="card-price-note"> depending on the option</span>}
         </p>
       )}
 
-      <PlaceLine state={detail} city={city} />
-      <FinePrint state={detail} />
+      {place === null ? (
+        <p className="card-place card-muted">{city}. No street is listed for this offer.</p>
+      ) : (
+        <p className="card-place">
+          {place.label}
+          {place.moreInCity > 0 && <span className="card-muted"> and {place.moreInCity} more in {city}</span>}
+        </p>
+      )}
+      <FinePrint lines={product.finePrint} />
 
       {bookingUrl !== null || bookingOptions.length > 0 ? (
         <p className="card-booking-note">Choose your date and time on Groupon before paying.</p>
+      ) : product.buyOptionId !== null ? (
+        <p className="card-booking-note">You pay on Groupon.</p>
       ) : null}
       {bookingUrl === null && bookingOptions.length > 0 && (
         <details className="card-booking-options">
@@ -142,80 +122,39 @@ export function OfferCard({ offer, city }: OfferCardProps) {
         </details>
       )}
       <div className="card-actions">
-        {bookingUrl !== null && (
+        {product.buyOptionId !== null ? (
+          // A form, not a link: each press makes one cart, and a link could be prefetched.
+          <form method="post" action={BUY_ACTION} target="_blank">
+            <input type="hidden" name="productId" value={product.id} />
+            <input type="hidden" name="optionId" value={product.buyOptionId} />
+            <button type="submit" className="button button-primary">
+              Buy on Groupon
+            </button>
+          </form>
+        ) : bookingUrl !== null ? (
           <a className="button button-primary" href={bookingUrl} target="_blank" rel="noopener noreferrer">
             Choose dates & book
           </a>
-        )}
-        {buyUrl !== null ? (
-          <a className="button button-primary" href={buyUrl} target="_blank" rel="noopener noreferrer">
-            Buy on Groupon
-          </a>
-        ) : bookingUrl === null && bookingOptions.length === 0 ? (
-          <span className="card-muted" role="status">
-            {detail.status === "loading" ? "Checking purchase options…"
-              : detail.status === "ready" && detail.detail.buyable === false ? "Not for sale right now"
-              : "Check the offer page for purchase options."}
-          </span>
+        ) : bookingOptions.length === 0 ? (
+          <span className="card-muted" role="status">Not for sale right now</span>
         ) : null}
-        {offerUrl !== null && (
-          <a className="button button-secondary" href={offerUrl} target="_blank" rel="noopener noreferrer">
-            Offer page
-          </a>
-        )}
       </div>
     </li>
   );
 }
 
-function PlaceLine({ state, city }: { readonly state: DetailState; readonly city: string }) {
-  switch (state.status) {
-    case "loading":
-      return <p className="card-place card-muted">Finding the place…</p>;
-    case "failed":
-      return <p className="card-place card-muted">{city}. The street did not load; the offer page has it.</p>;
-    case "ready": {
-      const place = placeOf(state.detail.locations, city);
-      if (place === null) return <p className="card-place card-muted">{city}. No street is listed for this offer.</p>;
-      return (
-        <p className="card-place">
-          {place.label}
-          {place.moreInCity > 0 && <span className="card-muted"> and {place.moreInCity} more in {city}</span>}
-        </p>
-      );
-    }
-    default: {
-      const unreachable: never = state;
-      return unreachable;
-    }
+function FinePrint({ lines }: { readonly lines: readonly string[] | null }) {
+  if (lines === null || lines.length === 0) {
+    return <p className="card-fineprint card-muted">No fine print is listed. Read it on Groupon&rsquo;s checkout before you pay.</p>;
   }
-}
-
-function FinePrint({ state }: { readonly state: DetailState }) {
-  switch (state.status) {
-    case "loading":
-      return <p className="card-fineprint card-muted">Loading the fine print…</p>;
-    case "failed":
-      return <p className="card-fineprint card-muted">The fine print did not load. Read it on the offer page before you buy.</p>;
-    case "ready": {
-      const lines = state.detail.finePrint;
-      if (lines.length === 0) {
-        return <p className="card-fineprint card-muted">No fine print is listed. Check the offer page before you buy.</p>;
-      }
-      return (
-        <details className="card-fineprint">
-          <summary>Fine print ({lines.length})</summary>
-          <ul>
-            {lines.map((line, index) => (
-              <li key={`${index}-${line}`}>{line}</li>
-            ))}
-          </ul>
-        </details>
-      );
-    }
-    default: {
-      const unreachable: never = state;
-      return unreachable;
-    }
-  }
+  return (
+    <details className="card-fineprint">
+      <summary>Fine print ({lines.length})</summary>
+      <ul>
+        {lines.map((line, index) => (
+          <li key={`${index}-${line}`}>{line}</li>
+        ))}
+      </ul>
+    </details>
+  );
 }

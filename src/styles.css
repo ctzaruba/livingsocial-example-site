@@ -583,6 +583,11 @@ h1 em {
   margin-top: auto;
 }
 
+/* The Buy button sits in a form (it posts to /api/buy); the form itself takes no room. */
+.card-actions form {
+  display: contents;
+}
+
 .more {
   margin-top: 1.5rem;
 }
